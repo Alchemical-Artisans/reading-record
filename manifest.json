@@ -1,11 +1,11 @@
 {
-	"id": "sample-plugin",
-	"name": "Sample Plugin",
+	"id": "reading-record",
+	"name": "Reading Record",
 	"version": "1.0.0",
 	"minAppVersion": "0.15.0",
-	"description": "Demonstrates some of the capabilities of the Obsidian API.",
-	"author": "Obsidian",
-	"authorUrl": "https://obsidian.md",
-	"fundingUrl": "https://obsidian.md/pricing",
+	"description": "Records information about books that have been read and your thoughts about the book.",
+	"author": "Alchemical Artisans",
+	"authorUrl": "https://alchemicalartisans.com",
+	"fundingUrl": "",
 	"isDesktopOnly": false
 }
