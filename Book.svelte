@@ -18,3 +18,9 @@
 		{/each}
 	</tbody></table>
 {/if}
+
+<style>
+	th {
+		vertical-align: top;
+	}
+</style>

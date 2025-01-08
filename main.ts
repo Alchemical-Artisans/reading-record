@@ -34,7 +34,12 @@ export default class MyPlugin extends Plugin {
 
 		this.registerView(BOOK_VIEW_TYPE, (leaf) => new BookView(this.app.workspace, leaf))
 
+		await this.buildLeaf()
+	}
+
+    async buildLeaf() {
         const workspace = this.app.workspace;
+		workspace.onLayoutReady(async () => {
 		const leaf = workspace.getRightLeaf(false);
 
 		if (leaf) {
@@ -43,7 +48,6 @@ export default class MyPlugin extends Plugin {
 				active: true,
 			});
 
-			workspace.onLayoutReady(async () => {
 				workspace.on("active-leaf-change", async () => {
 					active.file = workspace.getActiveFile();
 					if (active.file) {
@@ -61,11 +65,11 @@ export default class MyPlugin extends Plugin {
 						}
 					}
 				});
-			})
-		} else {
-			console.log("No leaf created");
-		}
-	}
+			} else {
+				console.log("No leaf created");
+			}
+		});
+    }
 
 	onunload() {
 		this.app.workspace.detachLeavesOfType(BOOK_VIEW_TYPE)
