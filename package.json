@@ -1,0 +1,38 @@
+{
+  "name": "reading-record",
+  "version": "0.0.0",
+  "description": "This allows for easier inclusion of notes in Obsidian related to books that have been read.",
+  "main": "dist/build/main.js",
+  "keywords": [],
+  "license": "MIT",
+  "author": "Alchemical Artisans",
+  "type": "module",
+  "scripts": {
+    "build": "ts-node scripts/build.ts",
+    "build:validate": "obsidian-dev-utils build:validate",
+    "dev": "ts-node scripts/dev.ts",
+    "lint": "obsidian-dev-utils lint",
+    "lint:fix": "obsidian-dev-utils lint:fix",
+    "spellcheck": "obsidian-dev-utils spellcheck",
+    "version": "obsidian-dev-utils version",
+    "test": "vitest --run"
+  },
+  "devDependencies": {
+    "@tsconfig/strictest": "^2.0.5",
+    "@types/node": "^22.10.7",
+    "esbuild-svelte": "^0.9.0",
+    "obsidian": "^1.7.2",
+    "obsidian-dev-utils": "^16.6.4",
+    "obsidian-typings": "^2.14.6",
+    "svelte": "^5.19.3",
+    "svelte-check": "^4.1.4",
+    "svelte-preprocess": "^6.0.3",
+    "ts-node": "^10.9.2",
+    "vitest": "^3.0.4"
+  },
+  "overrides": {
+    "boolean": "npm:dry-uninstall"
+  },
+  "dependencies": {
+  }
+}

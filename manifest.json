@@ -1,0 +1,9 @@
+{
+  "author": "Alchemical Artisans",
+  "authorUrl": "https://github.com/lackita/",
+  "description": "This allows for easier inclusion of notes in Obsidian related to books that have been read.",
+  "id": "reading-record",
+  "isDesktopOnly": false,
+  "name": "Reading Record",
+  "version": "0.0.0"
+}
