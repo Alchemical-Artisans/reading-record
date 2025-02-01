@@ -10,15 +10,16 @@
     "inlineSources": true,
     "lib": [
       "DOM",
-      "ES2024"
+      "ESNext"
     ],
     "module": "NodeNext",
     "moduleResolution": "NodeNext",
     "noEmit": true,
     "skipLibCheck": true,
-    "target": "ES2024",
+    "target": "ESNext",
     "types": [
       "node",
+      "svelte",
       "obsidian-typings"
     ],
     "verbatimModuleSyntax": true

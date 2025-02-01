@@ -2,8 +2,8 @@
 	import { active } from './state.svelte';
 </script>
 
-{#if active.frontmatter?.Cover}
-	<img alt="cover" src={active.frontmatter.Cover} />
+{#if active.frontmatter && active.frontmatter["Cover"]}
+	<img alt="cover" src={active.frontmatter["Cover"]} />
 {/if}
 
 {#if active.frontmatter}

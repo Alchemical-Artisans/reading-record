@@ -8,9 +8,9 @@
   "author": "Alchemical Artisans",
   "type": "module",
   "scripts": {
-    "build": "ts-node scripts/build.ts",
+    "build": "obsidian-dev-utils build",
     "build:validate": "obsidian-dev-utils build:validate",
-    "dev": "ts-node scripts/dev.ts",
+    "dev": "obsidian-dev-utils dev",
     "lint": "obsidian-dev-utils lint",
     "lint:fix": "obsidian-dev-utils lint:fix",
     "spellcheck": "obsidian-dev-utils spellcheck",
@@ -22,7 +22,6 @@
     "@types/node": "^22.10.7",
     "esbuild-svelte": "^0.9.0",
     "obsidian": "^1.7.2",
-    "obsidian-dev-utils": "^16.6.4",
     "obsidian-typings": "^2.14.6",
     "svelte": "^5.19.3",
     "svelte-check": "^4.1.4",
@@ -34,5 +33,6 @@
     "boolean": "npm:dry-uninstall"
   },
   "dependencies": {
+    "obsidian-dev-utils": "^17.4.0"
   }
 }
