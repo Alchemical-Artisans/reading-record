@@ -1,0 +1,7 @@
+.metadata-property:has(.embedded) {
+  flex-direction: column;
+}
+
+.metadata-property:has(.embedded) .metadata-property-key {
+  width: 100%;
+}
