@@ -50,10 +50,18 @@ export class ReadingRecordPlugin extends PluginBase<ReadingRecordPluginSettings>
 
         this.replaceAllEmbedded(view)
         this.app.vault.on("modify", () => this.replaceAllEmbedded(view))
-        workspace.on("file-open", () => this.replaceAllEmbedded(view))
-        workspace.on("active-leaf-change", () => this.replaceAllEmbedded(view))
+        for (const event of ["editor-change", "file-open", "active-leaf-change"]) {
+          this.respondTo(event, view)
+        }
       }
     })
+  }
+
+  private respondTo(event: string, view: FilePropertiesView) {
+    // @ts-ignore
+    this.app.workspace.on(event, () => {
+      this.replaceAllEmbedded(view)
+    });
   }
 
   private replaceAllEmbedded(view: FilePropertiesView) {
