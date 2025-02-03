@@ -135,7 +135,7 @@ describe("generate markdown", () => {
 
   test("frontmatter includes authors", () => {
     const book = new Book({ title: "example", authors: ["Angela Casella", "Denise Grover Swank"] });
-    expect(book.markdown().frontmatter["Authors"]).toEqual(["Angela Casella", "Denise Grover Swank"])
+    expect(book.markdown().frontmatter["Authors"]).toEqual(["[[Angela Casella]]", "[[Denise Grover Swank]]"])
   })
 
   describe("frontmatter generation", () => {
@@ -144,7 +144,7 @@ describe("generate markdown", () => {
         file_name: "foo.md",
         frontmatter: { a: "x" },
       })
-      expect(markdown.toString()).toEqual("a: x\n---\n")
+      expect(markdown.toString()).toEqual("---\na: x\n---\n")
     })
 
     test("array", () => {
@@ -152,7 +152,7 @@ describe("generate markdown", () => {
         file_name: "foo.md",
         frontmatter: { a: ["x", "y"] },
       })
-      expect(markdown.toString()).toEqual("a:\n  - x\n  - y\n---\n")
+      expect(markdown.toString()).toEqual("---\na:\n  - x\n  - y\n---\n")
     })
   })
 })

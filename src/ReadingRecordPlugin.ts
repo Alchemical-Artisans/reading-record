@@ -1,11 +1,11 @@
-import { MarkdownView, PluginSettingTab } from 'obsidian';
+import { Component, MarkdownRenderer, MarkdownView, PluginSettingTab } from 'obsidian';
 import { PluginBase } from 'obsidian-dev-utils/obsidian/Plugin/PluginBase';
 
 import { ReadingRecordPluginSettings } from './ReadingRecordPluginSettings.ts';
 import { ReadingRecordPluginSettingsTab } from './ReadingRecordPluginSettingsTab.ts';
 import { prompt } from 'obsidian-dev-utils/obsidian/Modal/Prompt';
-import { BOOK_VIEW_TYPE, BookView } from './BookView.ts';
-import { active } from './state.svelte.ts';
+import { Book, extractVolumeIDFrom } from './AddBook.ts';
+import type { FilePropertiesView } from 'obsidian-typings';
 
 export class ReadingRecordPlugin extends PluginBase<ReadingRecordPluginSettings> {
   protected override createPluginSettings(data: unknown): ReadingRecordPluginSettings {
@@ -27,66 +27,48 @@ export class ReadingRecordPlugin extends PluginBase<ReadingRecordPluginSettings>
         });
 
         if (url) {
-					const match = url.match("edition/[^/]+/([^?]+)?");
-					if (match) {
-						const id = match[1]
-						const request = await fetch(`https://www.googleapis.com/books/v1/volumes/${id}`);
-						const json = await request.json() as {
-              volumeInfo: {
-                title: string;
-                authors: string[];
-                imageLinks: {
-                  small: string;
-                };
-              }
-            };
-						const volume = json["volumeInfo"];
-						const note = await this.app.vault.create(`${this.settings.bookPath}/${volume["title"]}.md`, `---
-Cover: ${volume["imageLinks"]["small"].replace("http://", "https://")}
-Author:
-  - "[[${volume["authors"][0]}]]"
----`);
-						this.app.workspace.getActiveViewOfType(MarkdownView)?.leaf.openFile(note);
-					}
+          const id = extractVolumeIDFrom(url);
+          const book = await Book.fetch(id);
+          const markdown = book.markdown();
+          const note = await this.app.vault.create(
+            `${this.settings.bookPath}/${markdown.file_name}`,
+            markdown.toString(),
+          );
+					this.app.workspace.getActiveViewOfType(MarkdownView)?.leaf.openFile(note);
         }
 			}
 		})
 
-    await this.buildLeaf()
+    await this.adjustProperties()
   }
 
-  async buildLeaf() {
+  async adjustProperties() {
     const workspace = this.app.workspace;
-		this.registerView(BOOK_VIEW_TYPE, (leaf) => new BookView(workspace, leaf))
-		workspace.onLayoutReady(async () => {
-		  const leaf = workspace.getRightLeaf(false);
+    workspace.iterateAllLeaves((leaf) => {
+      if (leaf.view.getViewType() == "file-properties") {
+        const view = leaf.view as FilePropertiesView
+        this.replaceAllEmbedded(view)
+        this.app.vault.on("modify", () => {
+          this.replaceAllEmbedded(view)
+        })
+      }
+    })
+  }
 
-		  if (leaf) {
-			  await leaf.setViewState({
-				  type: BOOK_VIEW_TYPE,
-				  active: true,
-			  });
+  private replaceAllEmbedded(view: FilePropertiesView) {
+    view.containerEl.findAll(".metadata-property-value .metadata-input-longtext").forEach(async (e) => {
+      if (e.innerHTML.startsWith("!")) {
+        await this.performReplacement(e, view.leaf.component);
+      }
+    });
+  }
 
-				workspace.on("active-leaf-change", async () => {
-					active.file = workspace.getActiveFile();
-					if (active.file) {
-            const metadataCache = this.app.metadataCache;
-						active.frontmatter = metadataCache.getFileCache(active.file)?.frontmatter;
-						metadataCache.on("changed", (file) => {
-							if (file === active.file)
-								active.frontmatter = metadataCache.getFileCache(file)?.frontmatter
-						})
-
-						if (active.frontmatter) {
-							Object.keys(active.frontmatter).forEach(() => {
-								console.log("resolved link", metadataCache.resolvedLinks[active.frontmatter!["property"]])
-							});
-						}
-					}
-				});
-			} else {
-				console.log("No leaf created");
-			}
-		});
+  private async performReplacement(e: HTMLElement, component: Component) {
+    const parent = e.parentElement;
+    if (!parent!.find(".embedded")) {
+      const embedded = e.createDiv({ cls: "embedded" });
+      await MarkdownRenderer.render(this.app, e.innerHTML, embedded, "", component);
+      e.parentElement!.replaceChildren(embedded);
+    }
   }
 }

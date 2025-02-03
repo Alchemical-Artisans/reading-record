@@ -47,7 +47,7 @@ export class Book {
   }
 
   markdown() {
-    const frontmatter: Frontmatter = { Authors: this.authors }
+    const frontmatter: Frontmatter = { Authors: this.authors.map((author) => `[[${author}]]`) }
     if (this.cover) frontmatter["Cover"] = this.cover
     return new MarkdownFile({ file_name: `${this.title}.md`, frontmatter })
   }
@@ -65,7 +65,7 @@ export class MarkdownFile {
   }
 
   toString() {
-    return Object.entries(this.frontmatter).map(
+    return "---\n" + Object.entries(this.frontmatter).map(
       (e) => this.frontmatterEntryString(e)
     ).join("\n") + "\n---\n"
   }
