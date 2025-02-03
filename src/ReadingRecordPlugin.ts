@@ -47,10 +47,11 @@ export class ReadingRecordPlugin extends PluginBase<ReadingRecordPluginSettings>
     workspace.iterateAllLeaves((leaf) => {
       if (leaf.view.getViewType() == "file-properties") {
         const view = leaf.view as FilePropertiesView
+
         this.replaceAllEmbedded(view)
-        this.app.vault.on("modify", () => {
-          this.replaceAllEmbedded(view)
-        })
+        this.app.vault.on("modify", () => this.replaceAllEmbedded(view))
+        workspace.on("file-open", () => this.replaceAllEmbedded(view))
+        workspace.on("active-leaf-change", () => this.replaceAllEmbedded(view))
       }
     })
   }
