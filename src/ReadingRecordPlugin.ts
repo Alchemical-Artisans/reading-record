@@ -4,7 +4,7 @@ import { PluginBase } from 'obsidian-dev-utils/obsidian/Plugin/PluginBase';
 import { ReadingRecordPluginSettings } from './ReadingRecordPluginSettings.ts';
 import { ReadingRecordPluginSettingsTab } from './ReadingRecordPluginSettingsTab.ts';
 import { prompt } from 'obsidian-dev-utils/obsidian/Modal/Prompt';
-import { Book, extractVolumeIDFrom } from './AddBook.ts';
+import { Book, extractVolumeIDFrom, isGoogleBook } from './AddBook.ts';
 import type { FilePropertiesView } from 'obsidian-typings';
 
 export class ReadingRecordPlugin extends PluginBase<ReadingRecordPluginSettings> {
@@ -23,12 +23,18 @@ export class ReadingRecordPlugin extends PluginBase<ReadingRecordPluginSettings>
 			callback: async () => {
 				const url = await prompt({
           app: this.app,
-          title: "Google Books URL",
+          title: "Book URL",
         });
 
         if (url) {
-          const id = extractVolumeIDFrom(url);
-          const book = await Book.fetch(id);
+          let book: Book;
+          if (isGoogleBook(url)) {
+            const id = extractVolumeIDFrom(url);
+            book = await Book.from_google_books(id)
+          } else {
+            book = new Book({ title: "Unknown URL", authors: [], url })
+          }
+
           const markdown = book.markdown();
           const note = await this.app.vault.create(
             `${this.settings.bookPath}/${markdown.file_name}`,

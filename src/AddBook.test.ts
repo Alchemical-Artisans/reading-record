@@ -1,5 +1,5 @@
 import { describe, expect, test } from "vitest";
-import { Book, extractVolumeIDFrom, InvalidUrl, MarkdownFile } from "./AddBook.ts";
+import { Book, extractVolumeIDFrom, InvalidUrl, isGoogleBook, MarkdownFile } from "./AddBook.ts";
 
 const response_json = {
   "kind": "books#volume",
@@ -91,6 +91,11 @@ const response_json = {
   }
 }
 
+test("detect if google books", () => {
+  expect(isGoogleBook("https://www.google.com/books/edition/Pride_and_Prejudice/hJFnbfr43bcC?hl=en&gbpv=0")).toBeTruthy()
+  expect(isGoogleBook("https://archiveofourown.org/works/27599276/chapters/67518329")).toBeFalsy()
+});
+
 describe("extract volume id", () => {
   test("pull an ID out of a correctly structured URL", () => {
     const volume_id = extractVolumeIDFrom("https://www.google.com/books/edition/Pride_and_Prejudice/hJFnbfr43bcC?hl=en&gbpv=0")
@@ -112,7 +117,7 @@ describe("extract volume id", () => {
 
 describe("parse Books response", () => {
   test("extracts components from response", () => {
-    const book = Book.parse(response_json)
+    const book = Book.parse_google_book(response_json)
     expect(book.title).toEqual("Matchmaking a Grump")
     expect(book.authors).toEqual([
       "Angela Casella",
@@ -130,7 +135,7 @@ describe("generate markdown", () => {
 
   test("frontmatter includes cover URL", () => {
     const book = new Book({ title: "example", cover: "https://example.com/cover.png" });
-    expect(book.markdown().frontmatter["Cover"]).toEqual(book.cover)
+    expect(book.markdown().frontmatter["Cover"]).toEqual(`![Cover](${book.cover})`)
   })
 
   test("frontmatter includes authors", () => {
@@ -144,7 +149,7 @@ describe("generate markdown", () => {
         file_name: "foo.md",
         frontmatter: { a: "x" },
       })
-      expect(markdown.toString()).toEqual("---\na: x\n---\n")
+      expect(markdown.toString()).toEqual("---\na: \"x\"\n---\n")
     })
 
     test("array", () => {
@@ -152,7 +157,7 @@ describe("generate markdown", () => {
         file_name: "foo.md",
         frontmatter: { a: ["x", "y"] },
       })
-      expect(markdown.toString()).toEqual("---\na:\n  - x\n  - y\n---\n")
+      expect(markdown.toString()).toEqual("---\na:\n  - \"x\"\n  - \"y\"\n---\n")
     })
   })
 })

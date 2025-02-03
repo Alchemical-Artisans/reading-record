@@ -20,7 +20,7 @@ export class AddBookModal extends Modal {
 				btn.setButtonText("Add")
 					.onClick(async () => {
             const id = extractVolumeIDFrom(url)
-            const book = await Book.fetch(id)
+            const book = await Book.from_google_books(id)
             const markdown = book.markdown()
 						const note = await this.app.vault.create(
               `/Books/${markdown.file_name}`,

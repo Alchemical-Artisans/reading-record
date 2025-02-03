@@ -1,5 +1,9 @@
 export class InvalidUrl extends Error {}
 
+export function isGoogleBook(url: string): boolean {
+  return url.includes("google.com/books");
+}
+
 export function extractVolumeIDFrom(url: string): string {
   const match = url.match("edition/[^/]+/([^?]*)")
   if (!match || !match[1]) throw new InvalidUrl(url)
@@ -20,12 +24,12 @@ type FrontmatterValue = string | string[]
 type Frontmatter = Record<string, FrontmatterValue>
 
 export class Book {
-  static async fetch(id: string): Promise<Book> {
+  static async from_google_books(id: string): Promise<Book> {
     const response = await fetch(`https://www.googleapis.com/books/v1/volumes/${id}`)
-    return this.parse(await response.json() as GoogleBook)
+    return this.parse_google_book(await response.json() as GoogleBook)
   }
 
-  static parse(details: GoogleBook): Book {
+  static parse_google_book(details: GoogleBook): Book {
     const volumeInfo = details.volumeInfo;
     return new Book({
       title: volumeInfo.title,
@@ -37,18 +41,22 @@ export class Book {
   title: string
   authors: string[]
   cover: string | undefined
-  constructor({ title, authors, cover }: { title: string } & Partial<{
+  url: string | undefined
+  constructor({ title, authors, cover, url }: { title: string } & Partial<{
     authors: string[]
     cover: string
+    url: string
   }>) {
     this.title = title
     this.authors = authors || []
     this.cover = cover
+    this.url = url
   }
 
   markdown() {
     const frontmatter: Frontmatter = { Authors: this.authors.map((author) => `[[${author}]]`) }
-    if (this.cover) frontmatter["Cover"] = this.cover
+    if (this.cover) frontmatter["Cover"] = `![Cover](${this.cover})`
+    if (this.url) frontmatter["url"] = this.url
     return new MarkdownFile({ file_name: `${this.title}.md`, frontmatter })
   }
 }
@@ -74,10 +82,10 @@ export class MarkdownFile {
     if (value instanceof Array)
       return `${key}:\n${this.frontmatterArray(value)}`
     else
-      return `${key}: ${value}`
+      return `${key}: "${value}"`
   }
 
   frontmatterArray(value: string[]) {
-    return value.map((v) => `  - ${v}`).join("\n")
+    return value.map((v) => `  - "${v}"`).join("\n")
   }
 }
