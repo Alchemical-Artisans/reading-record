@@ -42,7 +42,7 @@ export class ReadingRecordPlugin extends PluginBase<ReadingRecordPluginSettings>
         const id = extractVolumeIDFrom(url);
         book = await Book.from_google_books(id);
       } else {
-        book = new Book({ title: `Unknown URL`, authors: [], url });
+        book = new Book({ title: `Unknown URL ${this.createRandomString(10)}`, authors: [], url });
       }
 
       const markdown = book.markdown();
@@ -52,6 +52,15 @@ export class ReadingRecordPlugin extends PluginBase<ReadingRecordPluginSettings>
       );
       this.app.workspace.getActiveViewOfType(MarkdownView)?.leaf.openFile(note);
     }
+  }
+
+  private createRandomString(length: number) {
+    const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+    let result = "";
+    for (let i = 0; i < length; i++) {
+      result += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    return result;
   }
 
   async adjustProperties() {
