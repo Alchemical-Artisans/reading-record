@@ -21,31 +21,37 @@ export class ReadingRecordPlugin extends PluginBase<ReadingRecordPluginSettings>
 			id: 'add-book',
 			name: 'Add Book',
 			callback: async () => {
-				const url = await prompt({
-          app: this.app,
-          title: "Book URL",
-        });
-
-        if (url) {
-          let book: Book;
-          if (isGoogleBook(url)) {
-            const id = extractVolumeIDFrom(url);
-            book = await Book.from_google_books(id)
-          } else {
-            book = new Book({ title: "Unknown URL", authors: [], url })
-          }
-
-          const markdown = book.markdown();
-          const note = await this.app.vault.create(
-            `${this.settings.bookPath}/${markdown.file_name}`,
-            markdown.toString(),
-          );
-					this.app.workspace.getActiveViewOfType(MarkdownView)?.leaf.openFile(note);
-        }
+				await this.addBook()
 			}
 		})
 
+    this.addRibbonIcon("book", "Add Book", async () => await this.addBook())
+
     await this.adjustProperties()
+  }
+
+  private async addBook() {
+    const url = await prompt({
+      app: this.app,
+      title: "Book URL",
+    });
+
+    if (url) {
+      let book: Book;
+      if (isGoogleBook(url)) {
+        const id = extractVolumeIDFrom(url);
+        book = await Book.from_google_books(id);
+      } else {
+        book = new Book({ title: `Unknown URL`, authors: [], url });
+      }
+
+      const markdown = book.markdown();
+      const note = await this.app.vault.create(
+        `${this.settings.bookPath}/${markdown.file_name}`,
+        markdown.toString()
+      );
+      this.app.workspace.getActiveViewOfType(MarkdownView)?.leaf.openFile(note);
+    }
   }
 
   async adjustProperties() {
